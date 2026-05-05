@@ -13,10 +13,10 @@ perl -0pi -e 's|get\("/", PageController, :home\)|get("/", PageController, :home
 perl -0pi -e 's|  def home\(conn, _params\) do|  def home(conn, %{"code" => _code} = params) do\n    FrontmanServerWeb.EntraAuthController.callback(conn, params)\n  end\n\n  def home(conn, %{"error" => _error} = params) do\n    FrontmanServerWeb.EntraAuthController.callback(conn, params)\n  end\n\n  def home(conn, _params) do|' \
   "$server_dir/lib/frontman_server_web/controllers/page_controller.ex"
 
-perl -0pi -e 's|redirect\(conn, external: "https://frontman.sh"\)|redirect(conn, to: ~p"/frontman")|' \
+perl -0pi -e 's|redirect\(conn, external: "https://frontman.sh"\)|redirect(conn, to: "/frontman")|' \
   "$server_dir/lib/frontman_server_web/controllers/page_controller.ex"
 
-perl -0pi -e 's|defp signed_in_path\(_conn\), do: ~p"/"|defp signed_in_path(_conn), do: ~p"/frontman"|' \
+perl -0pi -e 's|defp signed_in_path\(_conn\), do: ~p"/"|defp signed_in_path(_conn), do: "/frontman"|' \
   "$server_dir/lib/frontman_server_web/user_auth.ex"
 
 perl -0pi -e 's|    render\(conn, :new, form: form\)|    if System.get_env("ENTRA_CLIENT_ID") && params["entra_failed"] != "1" do\n      redirect(conn, to: ~p"/auth/entra")\n    else\n      render(conn, :new, form: form)\n    end|' \
