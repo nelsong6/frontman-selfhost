@@ -1,0 +1,73 @@
+name: Build and Rollout
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - patches/**
+      - scripts/**
+      - .github/workflows/build-and-rollout.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "17 9 * * *"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: frontman-selfhost-rollout
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tag
+        id: image
+        run: |
+          tag="build-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          image="ghcr.io/nelsong6/frontman-selfhost:${tag}"
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+          echo "image=${image}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push release image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.image.outputs.image }}
+            ghcr.io/nelsong6/frontman-selfhost:latest
+          build-args: |
+            FRONTMAN_REF=main
+
+      - name: Update deployment image
+        run: |
+          chmod +x scripts/update-image.sh
+          scripts/update-image.sh "${{ steps.image.outputs.image }}"
+
+      - name: Commit rollout manifest
+        run: |
+          if git diff --quiet -- k8s/server.yaml; then
+            echo "No rollout manifest changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add k8s/server.yaml
+          git commit -m "Roll frontman-selfhost image ${{ steps.image.outputs.tag }}"
+          git push
