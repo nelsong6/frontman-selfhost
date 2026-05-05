@@ -4,6 +4,12 @@ set -eu
 repo="${1:-/src}"
 server_dir="$repo/apps/frontman_server"
 
+cp /patches/github_auth_controller.ex \
+  "$server_dir/lib/frontman_server_web/controllers/github_auth_controller.ex"
+
+perl -0pi -e 's|  scope "/auth", FrontmanServerWeb do|  scope "/auth", FrontmanServerWeb do\n    get("/github", GithubAuthController, :request)\n    get("/github/callback", GithubAuthController, :callback)|' \
+  "$server_dir/lib/frontman_server_web/router.ex"
+
 perl -0pi -e 's|discord_new_users_webhook_url: env!\("DISCORD_NEW_USERS_WEBHOOK_URL", :string!\)|discord_new_users_webhook_url: env!("DISCORD_NEW_USERS_WEBHOOK_URL", :string, nil)|' \
   "$server_dir/config/runtime.exs"
 
