@@ -43,8 +43,7 @@ defmodule FrontmanServerWeb.GithubAuthController do
          {:ok, token} <- exchange_code(code),
          {:ok, profile} <- fetch_profile(token),
          {:ok, emails} <- fetch_emails(token),
-         {:ok, email} <- verified_email(profile, emails),
-         :ok <- validate_email(email),
+         {:ok, email} <- allowed_verified_email(profile, emails),
          {:ok, user} <- find_or_create_user(profile, email) do
       conn
       |> cleanup()
@@ -113,30 +112,27 @@ defmodule FrontmanServerWeb.GithubAuthController do
     end
   end
 
-  defp verified_email(profile, emails) do
-    email =
+  defp allowed_verified_email(profile, emails) do
+    verified_emails =
       emails
-      |> Enum.find(&(&1["primary"] == true and &1["verified"] == true))
-      |> case do
-        nil -> Enum.find(emails, &(&1["verified"] == true))
-        primary -> primary
-      end
-      |> case do
-        nil -> profile["email"]
-        email_record -> email_record["email"]
+      |> Enum.filter(&(&1["verified"] == true))
+      |> Enum.map(& &1["email"])
+      |> Enum.filter(&is_binary/1)
+      |> Enum.map(&String.downcase/1)
+
+    profile_email =
+      case profile["email"] do
+        email when is_binary(email) and email != "" -> [String.downcase(email)]
+        _ -> []
       end
 
-    if is_binary(email) and email != "" do
-      {:ok, String.downcase(email)}
-    else
-      {:error, :missing_verified_email}
+    candidate = Enum.find(verified_emails ++ profile_email, &allowed_email?/1)
+
+    cond do
+      is_binary(candidate) -> {:ok, candidate}
+      verified_emails == [] and profile_email == [] -> {:error, :missing_verified_email}
+      true -> {:error, :email_not_allowed}
     end
-  end
-
-  defp validate_email(email) do
-    Logger.info("GitHub OAuth verified email #{email}; allowed emails #{inspect(allowed_emails())}")
-
-    if allowed_email?(email), do: :ok, else: {:error, :email_not_allowed}
   end
 
   defp find_or_create_user(profile, email) do
