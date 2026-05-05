@@ -29,8 +29,11 @@ RUN yarn rescript clean && yarn rescript build
 ENV MIX_ENV=prod
 WORKDIR /src/apps/frontman_server
 
-RUN mix local.hex --force && \
-    mix local.rebar --force && \
+RUN for i in 1 2 3 4 5; do curl -fsSL -o /tmp/hex.ez https://builds.hex.pm/installs/1.19.0/hex-2.4.2-otp-28.ez && break || sleep 5; done && \
+    mix archive.install --force /tmp/hex.ez && \
+    for i in 1 2 3 4 5; do curl -fsSL -o /tmp/rebar3 https://builds.hex.pm/installs/1.18.4/rebar3-3.25.1-otp-28 && break || sleep 5; done && \
+    chmod +x /tmp/rebar3 && \
+    mix local.rebar --force rebar3 /tmp/rebar3 && \
     mix deps.get --only "${MIX_ENV}" && \
     mix deps.compile
 
