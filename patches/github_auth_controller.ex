@@ -134,6 +134,8 @@ defmodule FrontmanServerWeb.GithubAuthController do
   end
 
   defp validate_email(email) do
+    Logger.info("GitHub OAuth verified email #{email}; allowed emails #{inspect(allowed_emails())}")
+
     if allowed_email?(email), do: :ok, else: {:error, :email_not_allowed}
   end
 
