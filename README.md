@@ -4,9 +4,9 @@ Self-hosted Frontman release image and Kubernetes deployment wiring for the
 Glimmung test environment.
 
 The image intentionally builds from the latest upstream `frontman-ai/frontman`
-default branch on each build. CI applies the local Entra auth patch, builds a
-Phoenix release image, publishes it to GHCR, and updates `k8s/server.yaml` to
-roll ArgoCD onto the new immutable image tag.
+default branch on each build. CI applies only the runtime patching needed for
+this environment, builds a Phoenix release image, publishes it to GHCR, and
+updates `k8s/server.yaml` to roll ArgoCD onto the new immutable image tag.
 
 ## Rollout
 
