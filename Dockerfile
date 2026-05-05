@@ -37,7 +37,8 @@ RUN for i in 1 2 3 4 5; do curl -fsSL -o /tmp/hex.ez https://builds.hex.pm/insta
     mix deps.get --only "${MIX_ENV}" && \
     mix deps.compile
 
-RUN mix tailwind.install --if-missing && mix esbuild.install --if-missing
+RUN for i in 1 2 3 4 5; do mix tailwind.install --if-missing && break || sleep 5; done && \
+    for i in 1 2 3 4 5; do mix esbuild.install --if-missing && break || sleep 5; done
 
 RUN mix compile
 RUN mix tailwind frontman_server --minify && \
