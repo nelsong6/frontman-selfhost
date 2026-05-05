@@ -47,9 +47,6 @@ spec:
   rules:
     - matches:
         - path:
-            type: Exact
-            value: /
-        - path:
             type: PathPrefix
             value: /auth
         - path:
