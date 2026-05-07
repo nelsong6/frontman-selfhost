@@ -13,14 +13,14 @@ spec:
   template:
     metadata:
       annotations:
-        frontman-selfhost/image-revision: "107ff51a99203f1f6b96d2e88a1c99fde432c0c6"
+        frontman-selfhost/image-revision: "863f96a1f48a7e88e262632e1aa69cf9253affa2"
       labels:
         app: frontman-server
     spec:
       terminationGracePeriodSeconds: 5
       containers:
         - name: server
-          image: ghcr.io/nelsong6/frontman-selfhost:build-25360948420-1
+          image: ghcr.io/nelsong6/frontman-selfhost:build-25492598717-1
           imagePullPolicy: IfNotPresent
           command:
             - sh
