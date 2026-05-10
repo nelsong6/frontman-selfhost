@@ -1,0 +1,100 @@
+/* Glimmung self-host overrides: keep Frontman dark even when the host page,
+   browser, or markdown renderer defaults to light mode. */
+
+:root,
+html,
+body {
+  color-scheme: dark;
+  --background: oklch(0.11 0.016 286);
+  --foreground: oklch(0.96 0.006 286);
+  --card: oklch(0.15 0.018 286);
+  --card-foreground: oklch(0.96 0.006 286);
+  --popover: oklch(0.15 0.018 286);
+  --popover-foreground: oklch(0.96 0.006 286);
+  --primary: oklch(0.82 0.11 292);
+  --primary-foreground: oklch(0.12 0.018 286);
+  --secondary: oklch(0.22 0.02 286);
+  --secondary-foreground: oklch(0.94 0.006 286);
+  --muted: oklch(0.2 0.018 286);
+  --muted-foreground: oklch(0.7 0.018 286);
+  --accent: oklch(0.24 0.026 292);
+  --accent-foreground: oklch(0.96 0.006 286);
+  --destructive: oklch(0.64 0.2 25);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.72 0.1 292);
+}
+
+body {
+  background: #0b0712;
+  color: rgb(244 244 245);
+}
+
+.font-ibm-plex-mono {
+  color-scheme: dark;
+}
+
+/* Streamdown renders markdown/code with its own light defaults and sometimes
+   inline Shiki colors. Scope hard dark colors to chat markdown only. */
+.font-ibm-plex-mono [data-streamdown],
+.font-ibm-plex-mono [data-streamdown] p,
+.font-ibm-plex-mono [data-streamdown] li {
+  color: rgb(228 228 231);
+}
+
+.font-ibm-plex-mono [data-streamdown="inline-code"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgb(244 244 245) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.font-ibm-plex-mono [data-code-block-container],
+.font-ibm-plex-mono [data-streamdown="code-block"] {
+  background: #0b1020 !important;
+  border: 1px solid rgba(128, 81, 205, 0.35);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.font-ibm-plex-mono [data-code-block-header] {
+  background: #111827 !important;
+  color: rgb(161 161 170) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.font-ibm-plex-mono [data-code-block-header] button,
+.font-ibm-plex-mono [data-code-block-header] svg {
+  color: rgb(212 212 216) !important;
+  opacity: 1;
+}
+
+.font-ibm-plex-mono [data-code-block-container] pre,
+.font-ibm-plex-mono [data-code-block-container] code,
+.font-ibm-plex-mono [data-code-block-container] span,
+.font-ibm-plex-mono [data-streamdown="code-block"] pre,
+.font-ibm-plex-mono [data-streamdown="code-block"] code,
+.font-ibm-plex-mono [data-streamdown="code-block"] span {
+  background: transparent !important;
+}
+
+.font-ibm-plex-mono [data-code-block-container] pre,
+.font-ibm-plex-mono [data-streamdown="code-block"] pre {
+  background: #0b1020 !important;
+  color: rgb(228 228 231) !important;
+}
+
+.font-ibm-plex-mono [data-code-block-container] code,
+.font-ibm-plex-mono [data-streamdown="code-block"] code {
+  color: rgb(228 228 231) !important;
+}
+
+.font-ibm-plex-mono [data-code-block-container] [data-line-number],
+.font-ibm-plex-mono [data-streamdown="code-block"] [data-line-number] {
+  color: rgb(113 113 122) !important;
+}
+
+.font-ibm-plex-mono [data-streamdown="table-wrapper"] {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(128, 81, 205, 0.24);
+  border-radius: 0.5rem;
+}
