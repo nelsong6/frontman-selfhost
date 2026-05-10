@@ -10,9 +10,14 @@ cp "$patch_dir/github_auth_controller.ex" \
 
 cat "$patch_dir/dark-mode-overrides.css" \
   >> "$repo/libs/client/src/styles/frontman-theme.css"
+cp "$patch_dir/dark-mode-overrides.css" \
+  "$server_dir/priv/static/dark-mode-overrides.css"
 
 sed -i 's|className="flex flex-col h-screen w-screen bg-background text-foreground"|className="dark flex flex-col h-screen w-screen bg-background text-foreground"|' \
   "$repo/libs/client/src/Client__App.res"
+sed -i 's|${clientCssTag}|${clientCssTag}\
+    <link rel="stylesheet" href="/dark-mode-overrides.css">|' \
+  "$repo/libs/frontman-core/src/FrontmanCore__UIShell.res"
 
 tmp_router="$(mktemp)"
 awk '
