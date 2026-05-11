@@ -11,6 +11,8 @@ cp "$patch_dir/github_auth_controller.ex" \
 cat "$patch_dir/dark-mode-overrides.css" \
   >> "$repo/libs/client/src/styles/frontman-theme.css"
 
+git -C "$repo" apply "$patch_dir/message-quote-buttons.patch"
+
 sed -i 's|className="flex flex-col h-screen w-screen bg-background text-foreground"|className="dark flex flex-col h-screen w-screen bg-background text-foreground"|' \
   "$repo/libs/client/src/Client__App.res"
 

@@ -1,0 +1,105 @@
+diff --git a/libs/client/src/components/frontman/Client__AssistantMessage.res b/libs/client/src/components/frontman/Client__AssistantMessage.res
+index 1c7301e..68f1edf 100644
+--- a/libs/client/src/components/frontman/Client__AssistantMessage.res
++++ b/libs/client/src/components/frontman/Client__AssistantMessage.res
+@@ -7,9 +7,68 @@ module Icons = Client__ToolIcons
+ 
+ type variant = Streaming | Completed
+ 
++type quoteStyle = CodeFence | Blockquote
++
++let quoteIntoPrompt: (string, string) => unit = %raw(`
++  function(text, style) {
++    var quote;
++    if (style === "blockquote") {
++      quote = text.split("\\n").map(function(line) {
++        return line.length === 0 ? ">" : "> " + line;
++      }).join("\\n");
++    } else {
++      var fence = String.fromCharCode(96) + String.fromCharCode(96) + String.fromCharCode(96);
++      quote = fence + "\\n" + text + "\\n" + fence;
++    }
++
++    var editor = document.querySelector('[role="textbox"][contenteditable="true"]');
++    if (!editor) return;
++
++    editor.focus();
++    var current = editor.textContent || "";
++    var textToInsert = current.trim().length === 0 ? quote : "\\n\\n" + quote;
++    var sel = window.getSelection();
++    if (sel) {
++      var range = document.createRange();
++      range.selectNodeContents(editor);
++      range.collapse(false);
++      sel.removeAllRanges();
++      sel.addRange(range);
++    }
++
++    if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
++      document.execCommand("insertText", false, textToInsert);
++    } else {
++      editor.appendChild(document.createTextNode(textToInsert));
++    }
++    editor.dispatchEvent(new InputEvent("input", {bubbles: true, inputType: "insertText", data: textToInsert}));
++  }
++`)
++
++let quoteStyleToString = style =>
++  switch style {
++  | CodeFence => "code"
++  | Blockquote => "blockquote"
++  }
++
++module MessageActionButton = {
++  @react.component
++  let make = (~title: string, ~onClick: unit => unit, ~children) => {
++    <button
++      type_="button"
++      className="flex items-center justify-center w-5 h-5 border-none bg-transparent rounded cursor-pointer opacity-50 hover:opacity-80 transition-opacity text-zinc-200"
++      title
++      onClick={_ => onClick()}
++    >
++      {children}
++    </button>
++  }
++}
++
+ @react.component
+ let make = (~variant: variant, ~content: string, ~messageId as _: string, ~isNew: bool=false) => {
+   let isStreaming = variant == Streaming
++  let handleQuote = style => quoteIntoPrompt(content, quoteStyleToString(style))
+ 
+   <MessageContainer isNew isStreaming className="group relative">
+     <div className="text-[13px] leading-relaxed text-zinc-300 font-ibm-plex-mono">
+@@ -22,16 +81,26 @@ let make = (~variant: variant, ~content: string, ~messageId as _: string, ~isNew
+       ? <div
+           className="absolute bottom-1.5 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity z-10"
+         >
+-          <button
+-            type_="button"
+-            className="flex items-center justify-center w-5 h-5 border-none bg-transparent rounded cursor-pointer opacity-50 hover:opacity-80 transition-opacity text-zinc-200"
++          <MessageActionButton
++            title="Quote as code block"
++            onClick={() => handleQuote(CodeFence)}
++          >
++            <span className="text-[10px] leading-none font-mono"> {React.string("```")} </span>
++          </MessageActionButton>
++          <MessageActionButton
++            title="Quote as blockquote"
++            onClick={() => handleQuote(Blockquote)}
++          >
++            <span className="text-[12px] leading-none font-mono"> {React.string(">")} </span>
++          </MessageActionButton>
++          <MessageActionButton
+             title="Copy to clipboard"
+-            onClick={_ => {
++            onClick={() => {
+               let _ = WebAPI.Global.navigator.clipboard->WebAPI.Clipboard.writeText(content)
+             }}
+           >
+             <Icons.CopyIcon size=14 />
+-          </button>
++          </MessageActionButton>
+         </div>
+       : React.null}
+   </MessageContainer>
